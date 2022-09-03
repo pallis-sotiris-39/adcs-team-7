@@ -1,0 +1,18 @@
+spring.cloud:
+  function:
+    definition: readingProcessor
+  stream:
+    bindings:
+      readingProcessor-in-0:
+        destination: capy-broker
+      readingProcessor-out-0:
+        destination: capy-daily
+    kafka:
+      streams:
+        binder:
+          consumer-properties:
+            key-deserializer: org.springframework.kafka.support.serializer.IntegerDeserializer
+            value-deserializer: ../java.com.capy.streaming.serializer.ReadingDeserializer
+          producer-properties:
+            key-serializer: org.springframework.kafka.support.serializer.IntegerSerializer
+            value-serializer: ../java.com.capy.streaming.serializer.ReadingSerializer
