@@ -2,36 +2,62 @@ package com.capy.streaming;
 
 import com.capy.streaming.objects.DailyModel;
 import com.capy.streaming.objects.ReadingModel;
+import com.capy.streaming.serializer.DailyModelSerde;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @Configuration
 public class ReadingKafkaProcessor {
 
     @Bean
-    public Function<KStream<Integer, ReadingModel>, KStream<Integer, DailyModel>> readingProcessor() {
+    public Function<KStream<Long, ReadingModel>, KStream<Long, DailyModel>> readingProcessor() {
         return kStream -> {
-            java.util.Map<String, KStream<Integer, ReadingModel>> branchedKStream = kStream.split(Named.as("sensor-"))
-                    .branch(
-                            (id, readingModel) -> id == 1,
-                            Branched.as("branch1")
+            Map<String, KStream<Long, ReadingModel>> branchedKStream = kStream.split(Named.as("sensor-"))
+                    .branch((id, readingModel) -> readingModel.sensorId() == 1)
+                    .branch((id, readingModel) -> readingModel.sensorId() == 2)
+                    .defaultBranch();
+            Map<String, KStream<Long, DailyModel>> newKStreams = new HashMap<>();
+            branchedKStream.forEach(
+                    (s, stream) -> newKStreams.put(
+                            s,
+                            stream
+                                    .map((timestamp, readingModel) -> KeyValue.pair(getDayTimestampFromTimestamp(timestamp), readingModel))
+                                    .groupByKey().aggregate(
+                                            DailyModel::new,
+                                            (aLong, readingModel, dailyModel) -> new DailyModel(
+                                                    dailyModel.sensorId,
+                                                    dailyModel.sensorType,
+                                                    dailyModel.label,
+                                                    Float.min(readingModel.value(), dailyModel.min),
+                                                    Float.max(readingModel.value(), dailyModel.max),
+                                                    getAvgValue(readingModel, dailyModel),
+                                                    dailyModel.sum + readingModel.value(),
+                                                    dailyModel.total + 1
+                                            ),
+                                    Materialized.<Long, DailyModel, KeyValueStore<Bytes, byte[]>>as(
+                                            DailyModel.class.getName()
+                                    ).withValueSerde(new DailyModelSerde())
+                                    ).toStream()
                     )
-                    .branch(
-                            (id, readingModel) -> id == 2,
-                            Branched.as("branch2")
-                    )
-                    .defaultBranch(
-                            Branched.as("branch0")
-                    );
-            branchedKStream.get("branch0").groupByKey().aggregate(() -> new DailyModel(), (Aggregator<Integer, ReadingModel, ReadingModel>) (integer, readingModel, readingModel2) -> null).toStream();
-            KGroupedStream<Integer, ReadingModel> streamPerSensor = kStream.groupByKey();
-            return kStream;
+            );
+            KStream<Long, DailyModel> result = newKStreams.get("sensor-0").merge(newKStreams.get("sensor-1")).merge(newKStreams.get("sensor-2"));
+            return result;
         };
+    }
+
+    private float getAvgValue(ReadingModel readingModel, DailyModel dailyModel) {
+        return (dailyModel.sum + readingModel.value()) / (dailyModel.total + 1);
+    }
+
+    private Long getDayTimestampFromTimestamp(Long timestamp) {
+        return (timestamp / 86400L) * 86400L;
     }
 }

@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.IntegerSerializer;
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,12 +33,12 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<Integer, ReadingModel> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfig(), new IntegerSerializer(), new ReadingSerializer());
+    public ProducerFactory<Long, ReadingModel> producerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfig(), new LongSerializer(), new ReadingSerializer());
     }
 
     @Bean
-    public KafkaTemplate<Integer, ReadingModel> kafkaTemplate(ProducerFactory<Integer, ReadingModel> producerFactory) {
+    public KafkaTemplate<Long, ReadingModel> kafkaTemplate(ProducerFactory<Long, ReadingModel> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 }

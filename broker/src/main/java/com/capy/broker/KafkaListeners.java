@@ -13,11 +13,6 @@ public class KafkaListeners {
             groupId = "group-capy",
             containerFactory = "factory"
     )
-    void listener(ConsumerRecord<Integer, ReadingModel> record) {
-        //TODO Fill this appropriately
-        String message = "This should be a message from " + record.value().label() +
-                "Timestamp: " + record.value().timestamp() +
-                "Value: " + record.value().value();
-        System.out.println(message);
+    void listener(ConsumerRecord<Long, ReadingModel> record) {
     }
 }

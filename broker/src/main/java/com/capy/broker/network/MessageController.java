@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/readings")
 public class MessageController {
 
-    private final KafkaTemplate<Integer, ReadingModel> kafkaTemplate;
+    private final KafkaTemplate<Long, ReadingModel> kafkaTemplate;
 
-    public MessageController(KafkaTemplate<Integer, ReadingModel> kafkaTemplate) {
+    public MessageController(KafkaTemplate<Long, ReadingModel> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -21,11 +21,11 @@ public class MessageController {
     public void publish(@RequestBody ReadingRequest readingRequest) {
         kafkaTemplate.send(
                 "capy-broker",
-                readingRequest.sensorId(),
+                readingRequest.timestamp(),
                 new ReadingModel(
+                        readingRequest.sensorId(),
                         readingRequest.sensorType(),
                         readingRequest.label(),
-                        readingRequest.timestamp(),
                         readingRequest.value()
                 )
         );
