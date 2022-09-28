@@ -14,7 +14,6 @@ public class InfluxDBConnectionClass {
 
     @Bean
     public InfluxDBClient buildConnection(){
-        System.out.println("CONNECTED TO INFLUX HOPEFULLY");
         return InfluxDBClientFactory.create(url, token.toCharArray(), org, bucket);
     }
 }

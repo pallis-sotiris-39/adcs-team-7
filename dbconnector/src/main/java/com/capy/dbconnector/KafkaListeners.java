@@ -36,7 +36,6 @@ public class KafkaListeners {
                     .addField("sum", record.value().sum)
                     .time(record.key(), WritePrecision.S);
             writeApi.writePoint(point);
-            System.out.println("Successfully written to influxDB!");
         } catch (InfluxException e) {
             System.out.println("Exception!!" + e.getMessage());
         }
