@@ -30,11 +30,6 @@ public class ReadingSerializer implements Serializer<ReadingModel> {
     }
 
     @Override
-    public void close() {
-        Serializer.super.close();
-    }
-
-    @Override
     public byte[] serialize(String s, ReadingModel readingModel) {
         try {
             return objectMapper.writeValueAsBytes(readingModel);

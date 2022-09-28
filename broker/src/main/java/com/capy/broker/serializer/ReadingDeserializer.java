@@ -31,11 +31,6 @@ public class ReadingDeserializer implements Deserializer<ReadingModel> {
     }
 
     @Override
-    public void close() {
-        Deserializer.super.close();
-    }
-
-    @Override
     public ReadingModel deserialize(String s, byte[] bytes) {
         try {
             return objectMapper.readValue(new String(bytes, StandardCharsets.UTF_8), ReadingModel.class);

@@ -1,7 +1,6 @@
 package com.capy.streaming.serializer;
 
 import com.capy.streaming.objects.DailyModel;
-import com.capy.streaming.objects.ReadingModel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.header.Headers;
@@ -28,11 +27,6 @@ public class DailySerializer implements Serializer<DailyModel> {
             System.err.println("Exception!" + e + "Unable to serialize model: " + data);
             return null;
         }
-    }
-
-    @Override
-    public void close() {
-        Serializer.super.close();
     }
 
     @Override

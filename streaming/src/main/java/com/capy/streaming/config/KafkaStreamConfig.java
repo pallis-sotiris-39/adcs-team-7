@@ -1,7 +1,6 @@
 package com.capy.streaming.config;
 
 import com.capy.streaming.serializer.DailyModelSerdes;
-import com.capy.streaming.serializer.ReadingModelSerdes;
 import org.apache.kafka.common.serialization.Serdes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

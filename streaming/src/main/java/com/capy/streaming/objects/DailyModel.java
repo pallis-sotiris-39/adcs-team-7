@@ -31,12 +31,12 @@ public class DailyModel {
         this.total = total;
     }
 
-    public int sensorId;
-    public SensorType sensorType;
-    public String label;
-    public float min;
-    public float max;
-    public float avg;
-    public float sum;
-    public int total;
+    public final int sensorId;
+    public final  SensorType sensorType;
+    public final  String label;
+    public final  float min;
+    public final  float max;
+    public final  float avg;
+    public final  float sum;
+    public final  int total;
 }

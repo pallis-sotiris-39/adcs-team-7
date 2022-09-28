@@ -1,7 +1,6 @@
 package com.capy.streaming.serializer;
 
 import com.capy.streaming.objects.DailyModel;
-import com.capy.streaming.objects.ReadingModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -29,11 +28,6 @@ public class DailyDeserializer implements Deserializer<DailyModel> {
             System.err.println("Exception!" + e + "Unable to serialize model: " + Arrays.toString(data));
             return null;
         }
-    }
-
-    @Override
-    public void close() {
-        Deserializer.super.close();
     }
 
     @Override

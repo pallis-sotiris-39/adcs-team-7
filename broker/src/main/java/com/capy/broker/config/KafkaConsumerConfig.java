@@ -3,7 +3,6 @@ package com.capy.broker.config;
 import com.capy.broker.objects.ReadingModel;
 import com.capy.broker.serializer.ReadingDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

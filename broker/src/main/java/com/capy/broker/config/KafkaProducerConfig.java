@@ -1,11 +1,8 @@
 package com.capy.broker.config;
 
 import com.capy.broker.objects.ReadingModel;
-import com.capy.broker.serializer.ReadingDeserializer;
 import com.capy.broker.serializer.ReadingSerializer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.springframework.beans.factory.annotation.Value;
