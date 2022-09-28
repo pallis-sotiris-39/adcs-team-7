@@ -34,7 +34,7 @@ public class Main {
         Sensor energyConsumptionMeter = new EnergyConsumptionMeter(api, globalSensorId++, "Athens energy consumption meter", minMonthEnergyAthens, maxMonthEnergyAthens);
 
         thermometerAthens.start();
-        thermometerThessaloniki.start();
-        energyConsumptionMeter.start();
+        /*thermometerThessaloniki.start();
+        energyConsumptionMeter.start();*/
     }
 }

@@ -2,55 +2,42 @@ package com.capy.streaming;
 
 import com.capy.streaming.objects.DailyModel;
 import com.capy.streaming.objects.ReadingModel;
-import com.capy.streaming.serializer.DailyModelSerde;
-import org.apache.kafka.common.utils.Bytes;
+import com.capy.streaming.serializer.DailyModelSerdes;
+import com.capy.streaming.serializer.ReadingModelSerdes;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
-@Configuration
+@Component
 public class ReadingKafkaProcessor {
 
-    @Bean
-    public Function<KStream<Long, ReadingModel>, KStream<Long, DailyModel>> readingProcessor() {
-        return kStream -> {
-            Map<String, KStream<Long, ReadingModel>> branchedKStream = kStream.split(Named.as("sensor-"))
-                    .branch((id, readingModel) -> readingModel.sensorId() == 1)
-                    .branch((id, readingModel) -> readingModel.sensorId() == 2)
-                    .defaultBranch();
-            Map<String, KStream<Long, DailyModel>> newKStreams = new HashMap<>();
-            branchedKStream.forEach(
-                    (s, stream) -> newKStreams.put(
-                            s,
-                            stream
-                                    .map((timestamp, readingModel) -> KeyValue.pair(getDayTimestampFromTimestamp(timestamp), readingModel))
-                                    .groupByKey().aggregate(
-                                            DailyModel::new,
-                                            (aLong, readingModel, dailyModel) -> new DailyModel(
-                                                    dailyModel.sensorId,
-                                                    dailyModel.sensorType,
-                                                    dailyModel.label,
-                                                    Float.min(readingModel.value(), dailyModel.min),
-                                                    Float.max(readingModel.value(), dailyModel.max),
-                                                    getAvgValue(readingModel, dailyModel),
-                                                    dailyModel.sum + readingModel.value(),
-                                                    dailyModel.total + 1
-                                            ),
-                                    Materialized.<Long, DailyModel, KeyValueStore<Bytes, byte[]>>as(
-                                            DailyModel.class.getName()
-                                    ).withValueSerde(new DailyModelSerde())
-                                    ).toStream()
-                    )
-            );
-            KStream<Long, DailyModel> result = newKStreams.get("sensor-0").merge(newKStreams.get("sensor-1")).merge(newKStreams.get("sensor-2"));
-            return result;
-        };
+    @Autowired
+    public void buildPipeLine(StreamsBuilder streamsBuilder) {
+        streamsBuilder
+                .stream("capy-broker", Consumed.with(Serdes.Long(), ReadingModelSerdes.serdes()))
+                .map((timestamp, readingModel) -> KeyValue.pair(getDayTimestampFromTimestamp(timestamp), readingModel))
+                .groupByKey(Grouped.with(Serdes.Long(), ReadingModelSerdes.serdes()))
+                .aggregate(
+                        DailyModel::new,
+                        (aLong, readingModel, dailyModel) -> new DailyModel(
+                                readingModel.sensorId(),
+                                readingModel.sensorType(),
+                                readingModel.label(),
+                                Float.min(readingModel.value(), dailyModel.min),
+                                Float.max(readingModel.value(), dailyModel.max),
+                                getAvgValue(readingModel, dailyModel),
+                                dailyModel.sum + readingModel.value(),
+                                dailyModel.total + 1
+                        ),
+                        Materialized.with(Serdes.Long(), DailyModelSerdes.serdes())
+                )
+                .toStream()
+                .peek((key, dailyModel) -> System.out.println("Produced dailymodel with key= " + key + ", dailyModel: " + dailyModel))
+                .to("capy-daily", Produced.with(Serdes.Long(), DailyModelSerdes.serdes()));
     }
 
     private float getAvgValue(ReadingModel readingModel, DailyModel dailyModel) {
