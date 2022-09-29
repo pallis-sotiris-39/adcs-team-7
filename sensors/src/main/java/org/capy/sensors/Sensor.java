@@ -97,7 +97,7 @@ public abstract class Sensor {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.code() != 200) {
-                    String error = "❗ Something went wrong in sensor: " +
+                    String error = " Something went wrong in sensor: " +
                             label +
                             " This is the response code: " +
                             response.code() +
@@ -111,7 +111,7 @@ public abstract class Sensor {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                String error = "❌ Call failed fo sensor: " +
+                String error = " Call failed fo sensor: " +
                         label +
                         " This is the reason: " +
                         t.getLocalizedMessage();

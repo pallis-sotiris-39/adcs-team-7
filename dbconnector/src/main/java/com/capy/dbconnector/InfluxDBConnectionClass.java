@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class InfluxDBConnectionClass {
     private static final String url = "http://localhost:8086";
-    private static final String token = "mLAssWeFfJxYQiFQbOdpFEds9gzKyykl0THOU3l3M4FOksNwBNCBhedzBw-GnA1yLeWySIX1Z_wllXy_7QOJEw==";
+    private static final String token = "hMI-r7k-sa2DAdRkZu7CLBYW2UtOLr5v9LqL1t97UXqY20rEEHYDtR8JfOgIGb_vGrg8u1mQNDbyGHt2M--ovg==";
     private static final String org = "capy-bara";
     private static final String bucket = "sensor-test";
 

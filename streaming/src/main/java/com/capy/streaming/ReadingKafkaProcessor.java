@@ -19,15 +19,20 @@ public class ReadingKafkaProcessor {
 
     @Autowired
     public void buildPipeLine(StreamsBuilder streamsBuilder) {
-        Map<String, KStream<Long, ReadingModel>> streams = streamsBuilder
-                .stream("capy-broker", Consumed.with(Serdes.Long(), ReadingModelSerdes.serdes()))
+
+        KStream<Long, ReadingModel> kStream = streamsBuilder
+                .stream("capy-broker", Consumed.with(Serdes.Long(), ReadingModelSerdes.serdes()));
+        kStream
+                .filter((timestamp, readingModel) -> readingModel.isLate())
+                .to("capy-late", Produced.with(Serdes.Long(), ReadingModelSerdes.serdes()));
+
+        Map<String, KStream<Long, ReadingModel>> streams = kStream
                 .map((timestamp, readingModel) -> KeyValue.pair(getDayTimestampFromTimestamp(timestamp), readingModel))
                 .split(Named.as("branch-"))
                 .branch((timestamp, readingModel) -> readingModel.sensorId() == 2, Branched.as("2"))
                 .branch((timestamp, readingModel) -> readingModel.sensorId() == 1, Branched.as("1"))
                 .defaultBranch(Branched.as("0"));
 
-        Map<String, KStream<Long, DailyModel>> dailyStreams = new HashMap<>();
         streams.forEach((mapKey, stream) ->
                 stream
                         .groupByKey(Grouped.with(Serdes.Long(), ReadingModelSerdes.serdes()))

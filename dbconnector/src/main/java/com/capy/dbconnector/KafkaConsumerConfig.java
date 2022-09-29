@@ -1,7 +1,9 @@
 package com.capy.dbconnector;
 
 import com.capy.dbconnector.objects.DailyModel;
+import com.capy.dbconnector.objects.ReadingModel;
 import com.capy.dbconnector.serializer.DailyDeserializer;
+import com.capy.dbconnector.serializer.ReadingDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,10 +39,32 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Long, DailyModel>> factory() {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Long, DailyModel>> dailyFactory() {
         ConcurrentKafkaListenerContainerFactory<Long, DailyModel> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+
+    public Map<String, Object> lateConsumerConfig() {
+        HashMap<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "group-influx");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ReadingDeserializer.class);
+        return props;
+    }
+
+    @Bean
+    public ConsumerFactory<Long, ReadingModel> lateConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(lateConsumerConfig(), new LongDeserializer(), new ReadingDeserializer());
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Long, ReadingModel>> lateFactory() {
+        ConcurrentKafkaListenerContainerFactory<Long, ReadingModel> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(lateConsumerFactory());
         return factory;
     }
 }
