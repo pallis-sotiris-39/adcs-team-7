@@ -121,7 +121,7 @@ public abstract class Sensor {
     }
 
     private void checkIfFinished() {
-        if (readingsCounter == MAX_NUM_OF_READINGS) {
+        if (readingsCounter >= MAX_NUM_OF_READINGS) {
             System.out.println(ANSI_GREEN + "ALL READINGS HAVE FINISHED" + ANSI_RESET);
             timerTask.cancel();
             timer.cancel();
