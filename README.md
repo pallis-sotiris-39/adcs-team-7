@@ -1,20 +1,20 @@
 # adcs-team-7
 
+## How to run this project in your local machine:
 
+- Clone the repo
+- Run `docker-compose up -d` in the root directory
+- Wait for all docker containers to run
+- Build and run the `main()` function of the `sensors` module using gradle
 
-## How to run kafka in your local machine
+After these steps the sensors start producing data and this data is stored in `influxdb`.
 
-- Open your terminal of preference
-- Navigate to your `kafka` directory
-- Use these commands to run Kafka:re
+We had a problem with connecting grafana to our influxdb even though they're both running successfully.
 
-### Linux
-- `bin/zookeeper-server-start.sh config/zookeeper.properties`
-- `bin/kafka-server-start.sh config/server.properties`
+You can see all the data in influxdb UI with these steps:
 
-### Windows
-- `.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties`
-- `.\bin\windows\kafka-server-start.bat .\config\server.properties`
-
-### iOS
-- No money so I don't know 😥
+- Open your browser
+- Go to `http://localhost:8086`
+- Use credentials `capyuser` and `capypassword` for the username and password fields respectively
+- Navigate to the Data Explorer section.
+- Check bucket named `sensorbucket` using the time range of 25/12/2020 - 05/01/2022 (to include all late events)
