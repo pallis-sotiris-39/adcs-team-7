@@ -97,7 +97,7 @@ public abstract class Sensor {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.code() != 200) {
-                    String error = "❗ Something went wrong in sensor: " +
+                    String error = " Something went wrong in sensor: " +
                             label +
                             " This is the response code: " +
                             response.code() +
@@ -111,7 +111,7 @@ public abstract class Sensor {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                String error = "❌ Call failed fo sensor: " +
+                String error = " Call failed fo sensor: " +
                         label +
                         " This is the reason: " +
                         t.getLocalizedMessage();
@@ -121,7 +121,7 @@ public abstract class Sensor {
     }
 
     private void checkIfFinished() {
-        if (readingsCounter == MAX_NUM_OF_READINGS) {
+        if (readingsCounter >= MAX_NUM_OF_READINGS) {
             System.out.println(ANSI_GREEN + "ALL READINGS HAVE FINISHED" + ANSI_RESET);
             timerTask.cancel();
             timer.cancel();

@@ -7,26 +7,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("api/v1/readings")
 public class MessageController {
 
-    private final KafkaTemplate<Integer, ReadingModel> kafkaTemplate;
+    private Map<Integer, Long> latestTimestamps = new HashMap<>();
 
-    public MessageController(KafkaTemplate<Integer, ReadingModel> kafkaTemplate) {
+    private final KafkaTemplate<Long, ReadingModel> kafkaTemplate;
+
+    public MessageController(KafkaTemplate<Long, ReadingModel> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
     @PostMapping
     public void publish(@RequestBody ReadingRequest readingRequest) {
+        boolean isLate = false;
+        if (latestTimestamps.get(readingRequest.sensorId()) == null) {
+            latestTimestamps.put(readingRequest.sensorId(), readingRequest.timestamp());
+        } else {
+            if (readingRequest.timestamp() > latestTimestamps.get(readingRequest.sensorId())) {
+                latestTimestamps.put(readingRequest.sensorId(), readingRequest.timestamp());
+            } else {
+                isLate = true;
+            }
+        }
         kafkaTemplate.send(
                 "capy-broker",
-                readingRequest.sensorId(),
+                readingRequest.timestamp(),
                 new ReadingModel(
+                        readingRequest.sensorId(),
                         readingRequest.sensorType(),
                         readingRequest.label(),
-                        readingRequest.timestamp(),
-                        readingRequest.value()
+                        readingRequest.value(),
+                        isLate
                 )
         );
     }

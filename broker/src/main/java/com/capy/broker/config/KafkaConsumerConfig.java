@@ -3,7 +3,7 @@ package com.capy.broker.config;
 import com.capy.broker.objects.ReadingModel;
 import com.capy.broker.serializer.ReadingDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.IntegerDeserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,19 +26,19 @@ public class KafkaConsumerConfig {
         HashMap<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "group-capy");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ReadingDeserializer.class);
         return props;
     }
 
     @Bean
-    public ConsumerFactory<Integer, ReadingModel> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfig(), new IntegerDeserializer(), new ReadingDeserializer());
+    public ConsumerFactory<Long, ReadingModel> consumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfig(), new LongDeserializer(), new ReadingDeserializer());
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, ReadingModel>> factory() {
-        ConcurrentKafkaListenerContainerFactory<Integer, ReadingModel> factory =
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Long, ReadingModel>> factory() {
+        ConcurrentKafkaListenerContainerFactory<Long, ReadingModel> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
