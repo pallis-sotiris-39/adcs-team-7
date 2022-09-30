@@ -77,13 +77,13 @@ public class EnergyConsumptionMeter extends Sensor {
     private void getLowestEnergy() {
         float minEnergy = minMonthEnergyConsumed[currentMonth] + random.nextFloat(-0.02f, 0.02f);
         currentLow = (int) (minEnergy * 1000);
-        if (currentLow > currentHigh) getHighestEnergy();
+        if (currentLow >= currentHigh) getHighestEnergy();
     }
 
     private void getHighestEnergy() {
         float maxEnergy = maxMonthEnergyConsumed[currentMonth] + random.nextFloat(-0.02f, 0.02f);
         currentHigh = (int) (maxEnergy * 1000);
-        if (currentLow > currentHigh) getLowestEnergy();
+        if (currentLow >= currentHigh) getLowestEnergy();
     }
 
     @Override
